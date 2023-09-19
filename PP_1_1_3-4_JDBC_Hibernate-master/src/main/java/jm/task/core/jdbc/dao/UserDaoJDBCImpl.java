@@ -36,7 +36,6 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         String sql = "DROP TABLE IF EXISTS USER";
         executeSQLCommand(sql);
-
     }
 
     @Override
@@ -78,6 +77,7 @@ public class UserDaoJDBCImpl implements UserDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
         return usersList;
     }
 

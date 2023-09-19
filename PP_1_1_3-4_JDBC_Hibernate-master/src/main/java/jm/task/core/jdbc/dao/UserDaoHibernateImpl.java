@@ -2,6 +2,8 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -14,11 +16,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
 
     private void executeSQLCommand(String sql) {
-        try (SessionFactory sessionFactory = Util.getSessionFactory()) {
+        SessionFactory sessionFactory = Util.getSessionFactory();
+        try {
             Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
             session.createSQLQuery(sql).executeUpdate();
             session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -53,17 +58,24 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        try (SessionFactory sessionFactory = Util.getSessionFactory()) {
+        List<User> userList = new ArrayList<>();
+
+        try {
+            SessionFactory sessionFactory = Util.getSessionFactory();
+
             String sql = "SELECT * FROM USER";
 
             Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
 
-            List<User> userList = session.createNativeQuery(sql, User.class).getResultList();
+            userList = session.createNativeQuery(sql, User.class).getResultList();
             session.getTransaction().commit();
 
-            return userList;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        return userList;
     }
 
     @Override

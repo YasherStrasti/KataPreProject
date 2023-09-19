@@ -3,76 +3,62 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-    private Connection connection = Util.getConnection();
+    public UserDaoJDBCImpl() {}
 
+    private void executeSQLCommand(String sql) {
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.execute();
 
-    public UserDaoJDBCImpl() throws SQLException {
-
-    }
-
-
-    public void createUsersTable() {
-        try (Statement statement = connection.createStatement()) {
-            String sql = "CREATE TABLE IF NOT EXISTS USER " +
-                    " (id BIGINT NOT NULL AUTO_INCREMENT, " +
-                    " name VARCHAR(255), " +
-                    " lastName VARCHAR(255), " +
-                    " age TINYINT, " +
-                    " PRIMARY KEY (id));";
-            statement.executeUpdate(sql);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 
+    @Override
+    public void createUsersTable()  {
+        String sql = "CREATE TABLE IF NOT EXISTS USER " +
+                " (id BIGINT NOT NULL AUTO_INCREMENT, " +
+                " name VARCHAR(255), " +
+                " lastName VARCHAR(255), " +
+                " age TINYINT, " +
+                " PRIMARY KEY (id));";
+        executeSQLCommand(sql);
+    }
+
+    @Override
     public void dropUsersTable() {
-        try (Statement statement = connection.createStatement()) {
-            String sql = "DROP TABLE IF EXISTS USER ";
-            statement.executeUpdate(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        String sql = "DROP TABLE IF EXISTS USER";
+        executeSQLCommand(sql);
+
     }
 
+    @Override
     public void saveUser(String name, String lastName, byte age) {
-        try (Statement statement = connection.createStatement()) {
-            String sql = "INSERT INTO USER (name, lastName, age) " +
-                    "VALUES ('"  +
-                    name + "', '" +
-                    lastName + "', " +
-                    age + ");";
-            statement.executeUpdate(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        String sql = String.format("INSERT INTO USER (name, lastName, age) VALUES ('%s', '%s', '%d')", name, lastName, age);
+        executeSQLCommand(sql);
     }
 
+    @Override
     public void removeUserById(long id) {
-        try (Statement statement = connection.createStatement()) {
-            String sql = "DELETE FROM USER WHERE id='" + id +"';";
-
-            statement.executeUpdate(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        String sql = String.format("DELETE FROM USER WHERE id = %d;", id);
+        executeSQLCommand(sql);
     }
 
+    @Override
     public List<User> getAllUsers() {
         List<User> usersList = new ArrayList<>();
+        String sql = "SELECT * FROM USER";
 
-        try (Statement statement = connection.createStatement()) {
-            String sql = "SELECT * FROM USER";
-
-            ResultSet resultSet = statement.executeQuery(sql);
+        try (Connection connection = Util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet resultSet = ps.executeQuery()) {
 
             while (resultSet.next()) {
                 Long id = resultSet.getLong("id");
@@ -83,19 +69,21 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setId(id);
                 usersList.add(user);
             }
+
+            for (User u : usersList) {
+                System.out.println(u.toString());
+            }
+
+            System.out.printf("get users: %d%n", usersList.size());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return usersList;
     }
 
+    @Override
     public void cleanUsersTable() {
-        try (Statement statement = connection.createStatement()) {
-            String sql = "TRUNCATE TABLE USER;";
-            statement.executeUpdate(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        String sql = "TRUNCATE TABLE USER";
+        executeSQLCommand(sql);
     }
 }

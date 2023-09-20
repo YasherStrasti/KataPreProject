@@ -8,6 +8,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 public class UserDaoHibernateImpl implements UserDao {
 
@@ -48,19 +49,13 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Transaction transaction = null;
+        Session session = Util.getSessionFactory().getCurrentSession();
+        Transaction transaction = session.beginTransaction();
 
-        try {
-            Session session = Util.getSessionFactory().openSession();
-            transaction = session.beginTransaction();
-            session.save(new User(name, lastName, age));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+        session.save(new User(name, lastName, age));
+
+        transaction.commit();
+        session.close();
     }
 
     @Override
@@ -71,24 +66,19 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        List<User> userList = new ArrayList<>();
+        Session session = Util.getSessionFactory().getCurrentSession();
+        Transaction transaction = session.beginTransaction();
 
-        try {
-            SessionFactory sessionFactory = Util.getSessionFactory();
+        String hql = "FROM User";
 
-            String sql = "SELECT * FROM USER";
+        Query query = session.createQuery(hql);
 
-            Session session = sessionFactory.getCurrentSession();
-            session.beginTransaction();
+        List<User> users = query.getResultList();
 
-            userList = session.createNativeQuery(sql, User.class).getResultList();
-            session.getTransaction().commit();
+        transaction.commit();
+        session.close();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return userList;
+        return users;
     }
 
     @Override

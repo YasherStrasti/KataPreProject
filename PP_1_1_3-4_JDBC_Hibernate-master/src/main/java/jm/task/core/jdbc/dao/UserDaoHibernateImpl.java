@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 public class UserDaoHibernateImpl implements UserDao {
 
@@ -17,6 +18,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     private void executeSQLCommand(String sql) {
         SessionFactory sessionFactory = Util.getSessionFactory();
+
         try {
             Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
@@ -46,8 +48,19 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        String sql = String.format("INSERT INTO USER (name, lastName, age) VALUES ('%s', '%s', '%d')", name, lastName, age);
-        executeSQLCommand(sql);
+        Transaction transaction = null;
+
+        try {
+            Session session = Util.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+            session.save(new User(name, lastName, age));
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
     @Override

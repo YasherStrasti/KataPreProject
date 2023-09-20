@@ -9,11 +9,12 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-    public UserDaoJDBCImpl() {}
+    private final Connection connection = Util.getConnection();
+
+    public UserDaoJDBCImpl() throws SQLException {}
 
     private void executeSQLCommand(String sql) {
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.execute();
 
         } catch (SQLException e) {
@@ -54,9 +55,8 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> usersList = new ArrayList<>();
         String sql = "SELECT * FROM USER";
-
-        try (Connection connection = Util.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql);
+        executeSQLCommand(sql);
+        try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet resultSet = ps.executeQuery()) {
 
             while (resultSet.next()) {

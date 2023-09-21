@@ -8,6 +8,7 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
+//    вывод на консоль приведи в соответствие с тем, что указано в алгоритме работы приложения, лишних выводов на консоль не должно быть
     private final UserDao userDao = new UserDaoHibernateImpl();
 
     public UserServiceImpl() {
@@ -16,22 +17,20 @@ public class UserServiceImpl implements UserService {
 
     public void createUsersTable() {
         userDao.createUsersTable();
-        System.out.println("Table created!");
     }
 
     public void dropUsersTable() {
         userDao.dropUsersTable();
-        System.out.println("Table deleted!");
     }
 
     public void saveUser(String name, String lastName, byte age) {
         userDao.saveUser(name, lastName, age);
-        System.out.println("User saved!");
+        System.out.printf("User с именем - %s добавлен в базу данных!", name);
     }
 
     public void removeUserById(long id) {
         userDao.removeUserById(id);
-        System.out.println("User removed from table!");
+        System.out.printf("User with id: %d removed from table!", id);
 
     }
 
@@ -45,6 +44,5 @@ public class UserServiceImpl implements UserService {
 
     public void cleanUsersTable() {
         userDao.cleanUsersTable();
-        System.out.println("Table cleared!");
     }
 }

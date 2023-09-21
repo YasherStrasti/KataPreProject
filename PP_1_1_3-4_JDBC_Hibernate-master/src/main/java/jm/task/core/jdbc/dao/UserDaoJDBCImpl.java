@@ -68,12 +68,6 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setId(id);
                 usersList.add(user);
             }
-
-            for (User u : usersList) {
-                System.out.println(u.toString());
-            }
-
-            System.out.printf("get users: %d%n", usersList.size());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

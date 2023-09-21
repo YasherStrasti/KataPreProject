@@ -30,7 +30,7 @@ public class Util {
                 sessionFactory = new Configuration()
                         .setProperty("hibernate.connection.url", URL)
                         .setProperty("hibernate.connection.driver.class", "com.mysql.jdbc.Driver")
-                         .setProperty("hibernate.connection.username", USER)
+                        .setProperty("hibernate.connection.username", USER)
                         .setProperty("hibernate.connection.password", PASSWORD)
                         .setProperty("hibernate.current_session_context_class", "thread")
                         .setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect")
@@ -39,6 +39,7 @@ public class Util {
                         .buildSessionFactory();
             } catch (HibernateException e) {
                 System.out.println(e.getMessage());
+                sessionFactory.close();
             }
         }
 
